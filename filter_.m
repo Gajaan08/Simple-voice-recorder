@@ -69,13 +69,3 @@ plot(f(1:8*fs),Xf4(1:8*fs));
 title ('bandstop (Frequency Domain)');
 xlim([0 5000])
 ylim([0 2000])
-
-%butter filter
-[b, a] = butter(6,1000/(fs/2));
-filteredSignal = filter(b, a, Xt);
-Xf5 = abs(fft(filteredSignal));
-figure;
-plot(f(1:8*fs),Xf5(1:8*fs));
-title ('butterfilter (Frequency Domain)');
-xlim([0 5000])
-ylim([0 2000])
