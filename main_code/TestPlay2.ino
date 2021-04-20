@@ -105,7 +105,7 @@ void setup() {
 //      // set the interrupt last thing so other stuff is not affected
 //    TIMSK2 = 0b00000001; // Overflow interrupt enabled
 
-    process(sFile)
+    process(sFile);
     
   }
 
@@ -117,14 +117,14 @@ void process(File sFile)
     byte wavecontents[numBytes];
     byte wavecontentscopy[numBytes+30];
     for (int k = 0; k < 30; k++){
-      wavecontentscopy[k] = 0b00000000 // 0x00
+      wavecontentscopy[k] = 0b00000000; // 0x00
     }
 
     // storing the data
     for (int i = 0; i < numBytes; i++){
       byte data = sFile.read();
-      wavecontents[i] = data
-      wavecontentscopy[i+30] = data
+      wavecontents[i] = data;
+      wavecontentscopy[i+30] = data;
 
     }
 
@@ -139,9 +139,9 @@ void process(File sFile)
     byte filteredwave[numBytes];
     for (int p = 0; p < numBytes; p++)
     {
-       if (wavecontent[p] < threshold)
+       if (wavecontents[p] < threshold)
         {
-          filteredwave[p] = wavecontent[p]
+          filteredwave[p] = wavecontents[p];
         }
         else
         {
