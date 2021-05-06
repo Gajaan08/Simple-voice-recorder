@@ -28,20 +28,29 @@ void read_write(){
     s_File.seek(40);
     byte firstB = s_File.read();
     byte nextB = s_File.read();
-    numBytes = firstB + (nextB << 8);
+    byte next1B = s_File.read();
+    byte next2B = s_File.read();
+    numBytes = firstB + (nextB << 8)+(next1B << 16)+(next2B << 24);
     Serial.print("Num Bytes ");
     Serial.println(numBytes);
-    int numByte_selected = 80;
+    
+    //int numByte_selected = numBytes;
+    int numByte_selected = 100;
     Serial.print("numByte_selected");
     Serial.println(numByte_selected);
+    
+    byte waveheader[44];
     s_File.seek(0); 
-    char waveheader[44];
     for (int h = 0; h < 44; h++){
-      //waveheader[h] = s_File.read() ;
+      waveheader[h] = s_File.read() ;
+      //Serial.println(s_File.read());
       //Serial.println(s_File.read(),HEX);
-      sprintf(waveheader, "%02X ", s_File.read());
+      //sprintf(waveheader, "%02X ", s_File.read());
       //Serial.println(waveheader[h],HEX);
       }
+//      for (int i = 0; i <44; i++){
+//      Serial.println(waveheader[i]);
+//    }
 
     // filling empty....
     byte wavecontents[numByte_selected];
@@ -69,7 +78,6 @@ void read_write(){
          wavecontentsprocess[j]  = wavecontentscopy[j] + wavecontents[j];
     }
     s_File.close();
-
 
   Serial.println("Creating ...");
 
@@ -120,16 +128,20 @@ void read_write(){
       if (m < 44)
       {
         finalechodata[m] = waveheader[m];
-        sEcho.println(finalechodata[m]);
+        //Serial.println(finalechodata[m]);
+        //sEcho.println(finalechodata[m]);
         //sprintf(finalechodata, "%02X ",waveheader[m] );
       }
       else
       {
         finalechodata[m] = wavecontentsprocess[m - 44];
-        sEcho.println(finalechodata[m]);
+       //Serial.println(finalechodata[m]);
+        //finalechodata[m] = wavecontents[m - 44];
+        //sEcho.println(finalechodata[m]);
         //sprintf(finalechodata, "%02X ",wavecontentsprocess[m - 44] );
       }
     }
+    sEcho.write((byte *)&finalechodata,numByte_selected + 44);
     // close the file:
     sEcho.close();
     Serial.println("done.");
@@ -139,11 +151,26 @@ void read_write(){
   }
 
   
+//    for (int i = 0; i <numByte_selected+44; i++){
+//      Serial.println(finalechodata[i]);
+//    }
     for (int i = 0; i < numByte_selected; i++){
       //Serial.println(wavecontents[i]);
       //Serial.println(wavecontentscopy[i]);
       //Serial.println(wavecontentsprocess[i]);
       //Serial.println(finalechodata[i],HEX);
     }
-    //Serial.print(sizeof(finalechodata));     
+   // Serial.print(sizeof(finalechodata));    
+
+//
+//    File sFile = SD.open("echo.wav");
+//    if( !sFile ){ 
+//        Serial.println("File not opened"); 
+//    }
+//    else {
+//        for (byte i = 0; i <numByte_selected+44 ; i++){
+//            Serial.println(sFile.read());
+//        }
+//    }
+//    
 }
