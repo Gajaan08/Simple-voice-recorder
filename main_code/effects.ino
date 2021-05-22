@@ -1,14 +1,13 @@
 #include <SPI.h>
 #include <SD.h>
-#include <MCP_DAC.h>
-MCP4921 myDAC;
 File recFile;
+File halffreq;
+File fasterfile;
+File echofile;
 #define CS_pin 10;
-int sampledata[81];
-int sampledatacopy[101];
+int sampledata[100];
 int fastdata[4];
-int i=0;
-int j=0;
+int i,j,m,c=0;
 String line;
 int line_;
 void setup() {
@@ -18,60 +17,65 @@ void setup() {
     Serial.println("initialization failed!");
     while (1);
   }
-  Serial.println("initialization done.");
-  recFile = SD.open("test.txt", FILE_READ);
-  if (recFile) {
-      Serial.println("File opened sucessfully");
-  } else {
-      Serial.println("error opening REC.txt");
-  }
-  for(int k=0;k<50;k++){
-      sampledatacopy[k]=0;
+  Serial.println("initialization.");
+  SD.remove("halffreq.txt");
+  SD.remove("faster.txt");
+  SD.remove("echo.txt");
+  recFile = SD.open("rec.txt", FILE_READ);
+  halffreq = SD.open("halffreq.txt",FILE_WRITE);
+  fasterfile = SD.open("faster.txt",FILE_WRITE);
+  echofile = SD.open("echo.txt",FILE_WRITE);
+  
+  for(int k=0;k<20;k++){
+      sampledata[k]=0;
     }
-      while(recFile.available()){
+   while(recFile.available()){
       line = recFile.readStringUntil('\n');
       line_=line.toInt();
-      Serial.println(line_);
+     // Serial.println(line_);
+      m++;
       
-      //change amplitude
-//      int CA=change_amplitude(line.toInt());
-//      Serial.println(CA);
+      //half frequency
+      if (m%2==1){
+        halffreq.println(String(line_));  
+      }
 
       //faster
-      //Serial.println(j);
       if (j<2){
         fastdata[j]=line_;
         j++;
       }
       else if (j == 2){
-//        int FS=faster();
-//        Serial.println(FS);
+        int FS=faster();
+        fasterfile.println(String(FS));
         j=0;
       }
       
        //echo
       if (i<80){
-      sampledata[i] = line_;
-      sampledatacopy[i+20] = line_;
-      i++;
+        sampledata[i+20] = line_;
+        i++;
+      } 
+      if (i>59 && i<80){
+        sampledata[c] = line_;
+        c++;
       }
-      else if (i==80){
-        i=0;
+      if ((i==79) || (c==19)){
+        i,c = 0;
       }
-//      int EH=echo();
-//      Serial.println(EH);
+      int EH=echo();
+      echofile.println(String(EH));
   }
+    fasterfile.close();
+    echofile.close();
+    halffreq.close();
     recFile.close();
+    Serial.println("Finished");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
-}
-
-int change_amplitude(int data){
-  int val = 0.8*data;
-  return val;
 }
 
 int faster(){
@@ -80,9 +84,20 @@ int faster(){
 }
 
 int echo(){
-  int echodata = sampledata[i] + (0.5*sampledatacopy[i]);
-   if (echodata>255) {
-    echodata=255;
+  int echodata = sampledata[i+20] + (0.5*sampledata[i]);
+  if (echodata>255) {
+      echodata=255;
   }
   return echodata;
 }
+
+
+      //change amplitude
+//      int CA=change_amplitude(line.toInt());
+//      Serial.println(CA);
+
+
+//int change_amplitude(int data){
+//  int val = 0.8*data;
+//  return val;
+//}
